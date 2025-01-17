@@ -1,1 +1,23 @@
+/* 기본 스타일 */
+body {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  background-color: #f0f0f0;
+  font-family: sans-serif;
+}
 
+/* 제목(H1) 스타일 */
+h1 {
+  margin-top: 20px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* 캔버스 스타일 */
+#gameCanvas {
+  background-color: #70c5ce;  /* 하늘색 배경 */
+  border: 2px solid #333;
+  display: block;            /* 가운데 정렬을 위해 block */
+  margin: 20px auto;         /* 수평 중앙 */
+}
