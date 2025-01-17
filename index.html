@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>플래피버드 (이미지 적용)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background-color: #f0f0f0;
+      font-family: sans-serif;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    #info {
+      margin: 10px auto;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    #game-container {
+      position: relative;
+      display: inline-block; /* 가운데 정렬 */
+    }
+    #gameCanvas {
+      background-color: #70c5ce; /* 하늘색 */
+      border: 2px solid #333;
+      display: block;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>플래피버드 (이미지 적용)</h1>
+  <div id="info">↑(위 방향키) 또는 스페이스바로 점프 | 새로고침(F5)으로 재시작</div>
+
+  <!-- 게임 영역 -->
+  <div id="game-container">
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <div id="score">Score: 0</div>
+  </div>
+
+  <script>
+    /*****************************************
+     * 0) 이미지 미리 로드
+     *    (이미지 파일들은 같은 폴더에 있다고 가정)
+     *****************************************/
+    const birdImg = new Image();
+    birdImg.src = "bird.png";  // 예) 새 이미지
+
+    const pipeNorthImg = new Image();
+    pipeNorthImg.src = "pipeNorth.png"; // 파이프 윗부분
+
+    const pipeSouthImg = new Image();
+    pipeSouthImg.src = "pipeSouth.png"; // 파이프 아랫부분
+
+
+    /*****************************************
+     * 1) 기본 설정
+     *****************************************/
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 게임 크기
+    const WIDTH = canvas.width;   // 320
+    const HEIGHT = canvas.height; // 480
+
+    // 새(버드) 관련
+    let birdX = 50;         // 새의 X좌표 (고정)
+    let birdY = HEIGHT/2;   // 새의 Y좌표
+    const birdWidth = 34;   // 새 이미지 폭(예시)
+    const birdHeight = 24;  // 새 이미지 높이(예시)
+    let gravity = 0.6;      // 중력
+    let velocity = 0;       // 새의 수직 속도
+    let jumpPower = -9;     // 점프 시 위로 가하는 힘
+
+    // 파이프 관련
+    const pipeWidth = 52;   // 파이프 이미지 폭(예시)
+    const gap = 100;        // 파이프 사이 간격
+    let pipeSpeed = 2;      // 파이프 이동 속도
+    let pipes = [];         // 파이프 배열
+
+    // 점수
+    let score = 0;
+
+    // 게임 오버 상태
+    let gameOver = false;
+
+
+    /*****************************************
+     * 2) 이벤트: 점프 처리 (키보드)
+     *****************************************/
+    document.addEventListener("keydown", onKeyDown);
+
+    function onKeyDown(e) {
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        // 점프
+        velocity = jumpPower;
+      }
+    }
+
+
+    /*****************************************
+     * 3) 초기 파이프 세팅
+     *****************************************/
+    function initPipes() {
+      // 처음 화면에 3개 정도 배치
+      for (let i = 0; i < 3; i++) {
+        let pipeX = 300 + i * 200;
+        createPipe(pipeX);
+      }
+    }
+
+    function createPipe(xPos) {
+      // 파이프 상단 높이를 랜덤으로 설정
+      let topHeight = Math.floor(Math.random() * 120) + 40; // 최소40 ~ 최대160
+      let bottomY = topHeight + gap;
+      let bottomHeight = HEIGHT - bottomY;
+
+      let pipe = {
+        x: xPos,
+        topHeight: topHeight,
+        bottomY: bottomY,
+        bottomHeight: bottomHeight,
+        passed: false
+      };
+      pipes.push(pipe);
+    }
+
+
+    /*****************************************
+     * 4) 메인 루프: update() & draw()
+     *****************************************/
+    function update() {
+      if (gameOver) return;
+
+      // 새 물리 계산
+      velocity += gravity;
+      birdY += velocity;
+
+      // 파이프 이동
+      for (let i = 0; i < pipes.length; i++) {
+        let p = pipes[i];
+        p.x -= pipeSpeed;
+
+        // 화면 왼쪽 밖으로 나간 파이프 제거 & 새 파이프 추가
+        if (p.x + pipeWidth < 0) {
+          pipes.splice(i, 1);
+          i--;
+          createPipe(WIDTH + 50);
+        }
+
+        // 점수 증가 (파이프 중앙을 지날 때)
+        if (!p.passed && p.x + pipeWidth < birdX) {
+          score++;
+          p.passed = true;
+        }
+
+        // 충돌 판정
+        if (checkCollision(birdX, birdY, birdWidth, birdHeight, p)) {
+          gameOver = true;
+        }
+      }
+
+      // 바닥/천장 충돌
+      if (birdY + birdHeight > HEIGHT || birdY < 0) {
+        gameOver = true;
+      }
+
+      // 점수 표시
+      document.getElementById("score").textContent = "Score: " + score;
+    }
+
+    function draw() {
+      // 전체 지우기
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      // 파이프 그리기
+      pipes.forEach(p => {
+        // 위 파이프 (p.topHeight 높이만큼 이미지 보이도록)
+        //  - 파이프North 이미지는 이미지 전체 높이를 다 그려도 되고,
+        //    topHeight까지만 스케일로 늘려서 그릴 수도 있음.
+        ctx.drawImage(pipeNorthImg, p.x, p.topHeight - pipeNorthImg.height, pipeWidth, pipeNorthImg.height);
+
+        // 아래 파이프
+        ctx.drawImage(pipeSouthImg, p.x, p.bottomY, pipeWidth, pipeSouthImg.height);
+      });
+
+      // 새(이미지)
+      ctx.drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+
+      // 게임 오버 시 어두운 오버레이 + 텍스트
+      if (gameOver) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = "#fff";
+        ctx.font = "24px Arial";
+        ctx.fillText("Game Over", WIDTH / 2 - 60, HEIGHT / 2 - 10);
+        ctx.fillText("Score: " + score, WIDTH / 2 - 50, HEIGHT / 2 + 30);
+      }
+    }
+
+
+    /*****************************************
+     * 5) 충돌 판정
+     *****************************************/
+    function checkCollision(bx, by, bW, bH, pipe) {
+      // 새의 사각형 범위
+      let birdLeft = bx;
+      let birdRight = bx + bW;
+      let birdTop = by;
+      let birdBottom = by + bH;
+
+      // 파이프 상단 영역
+      let pipeTopLeft = pipe.x;
+      let pipeTopRight = pipe.x + pipeWidth;
+      let pipeTopBottom = pipe.topHeight; // 실제 파이프 “공간”의 경계
+
+      // 위쪽 파이프 이미지 자체는 topHeight 위로 그려졌으므로,
+      // 실제 충돌은 새의 top이 pipeTopBottom보다 작으면 충돌로 볼 수 있음.
+      let collideTop = (birdRight >= pipeTopLeft && birdLeft <= pipeTopRight && birdTop <= pipeTopBottom);
+
+      // 파이프 하단 영역
+      let pipeBottomLeft = pipe.x;
+      let pipeBottomRight = pipe.x + pipeWidth;
+      let pipeBottomTop = pipe.bottomY; // gap 이후 시작
+
+      let collideBottom = (birdRight >= pipeBottomLeft && birdLeft <= pipeBottomRight && birdBottom >= pipeBottomTop);
+
+      return collideTop || collideBottom;
+    }
+
+
+    /*****************************************
+     * 6) 메인 루프
+     *****************************************/
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 초기화
+    initPipes();
+    gameLoop();
+  </script>
+</body>
+</html>
