@@ -1,87 +1,81 @@
 /*****************************************
- * 1) 캔버스 및 기본 변수 설정
+ * 변수 및 초기 설정 (간략 예시)
  *****************************************/
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// 캔버스 크기
-const WIDTH = canvas.width;    // 320
-const HEIGHT = canvas.height;  // 480
+const WIDTH = canvas.width;   // 320
+const HEIGHT = canvas.height; // 480
 
-// 새(버드) 관련
-let birdX = 50;         // 새의 X좌표 (거의 고정)
-let birdY = 150;        // 새의 Y좌표
-let birdSize = 20;      // 새의 크기(사각형 한 변)
-let velocity = 0;       // 수직 속도
-let gravity = 0.5;      // 중력
-let jumpPower = -8;     // 점프 힘(음수값으로 위로 이동)
+const pipeNorthImg = new Image();
+pipeNorthImg.src = "pipeNorth.png";
+const pipeSouthImg = new Image();
+pipeSouthImg.src = "pipeSouth.png";
 
-// 파이프 관련
-let pipes = [];         // 파이프 정보 배열
-const gap = 100;        // 파이프 사이 빈 공간
-const pipeWidth = 50;   // 파이프 폭
-const pipeSpeed = 2;    // 파이프 이동 속도
+// 파이프 정보
+let pipes = [];
+const gap = 100;       // 파이프 사이 간격 "항상" 고정
+const pipeWidth = 52;  // 파이프 이미지 폭 (예: 52px)
+const pipeSpeed = 2;
 
-// 점수
+// 새
+let birdX = 50;
+let birdY = 150;
+let gravity = 0.5;
+let velocity = 0;
+let jumpPower = -8;
+
 let score = 0;
-
-// 게임 상태
-let isGameOver = false;
+let gameOver = false;
 
 /*****************************************
- * 2) 키보드 입력 (점프)
+ * 키보드 이벤트 (점프)
  *****************************************/
-document.addEventListener("keydown", onKeyDown);
-
-function onKeyDown(e) {
-  // 스페이스바, 위 방향키 시 새 점프
+document.addEventListener("keydown", (e) => {
   if (e.code === "Space" || e.code === "ArrowUp") {
     velocity = jumpPower;
   }
-}
+});
 
 /*****************************************
- * 3) 파이프 초기 세팅
+ * 파이프 초기화
  *****************************************/
 function initPipes() {
-  // 화면 바깥쪽부터 시작해서 일정 간격으로 여러 개 생성
   for (let i = 0; i < 3; i++) {
-    let pipeX = 300 + i * 200;  // 200픽셀 간격
-    createPipe(pipeX);
+    createPipe(300 + i * 200);
   }
 }
 
-function createPipe(x) {
-  // 위 파이프 높이 무작위 설정
-  let topHeight = Math.floor(Math.random() * 120) + 40;
-  // 아래 파이프 시작점 = topHeight + gap
-  let bottomY = topHeight + gap;
+function createPipe(xPos) {
+  // 위쪽 파이프 높이를 무작위 설정
+  let topHeight = Math.floor(Math.random() * 120) + 40; // 40~160 사이
+  let bottomY = topHeight + gap; // gap만큼 떨어진 지점부터 아래 파이프 시작
 
   let pipe = {
-    x: x,                  // 파이프의 현재 X좌표
-    topHeight: topHeight,  // 위 파이프 높이
-    bottomY: bottomY,      // 아래 파이프 시작 y좌표
-    passed: false          // 점수 획득 여부 체크
+    x: xPos,
+    topHeight: topHeight,
+    bottomY: bottomY,
+    passed: false
   };
   pipes.push(pipe);
 }
 
 /*****************************************
- * 4) 메인 업데이트 로직
+ * 메인 업데이트
  *****************************************/
 function update() {
-  if (isGameOver) return;
+  if (gameOver) return;
 
-  // 새 물리 적용
-  velocity += gravity;  // 중력 가속
-  birdY += velocity;    // 새 위치 업데이트
+  // 새 물리
+  velocity += gravity;
+  birdY += velocity;
 
-  // 파이프 이동 및 충돌 판정
+  // 파이프 이동
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
     p.x -= pipeSpeed;
 
-    // 화면 왼쪽을 벗어난 파이프는 제거 & 새 파이프 생성
+    // 화면 왼쪽 밖으로 나간 파이프 재생성
     if (p.x + pipeWidth < 0) {
       pipes.splice(i, 1);
       i--;
@@ -89,95 +83,98 @@ function update() {
       continue;
     }
 
-    // 새가 파이프 중앙(혹은 끝)을 통과했는지 체크
+    // 점수 증가
     if (!p.passed && p.x + pipeWidth < birdX) {
       score++;
       p.passed = true;
     }
 
-    // 충돌 체크
+    // 충돌 판정
     if (checkCollision(p)) {
-      isGameOver = true;
+      gameOver = true;
     }
   }
 
-  // 화면 위/아래 경계 충돌
-  if (birdY < 0 || birdY + birdSize > HEIGHT) {
-    isGameOver = true;
+  // 화면 위아래 범위
+  if (birdY < 0 || birdY + 24 > HEIGHT) { // 새 높이를 24라 가정
+    gameOver = true;
   }
 }
 
 /*****************************************
- * 5) 충돌 판정 함수
+ * 파이프 충돌 판정
  *****************************************/
 function checkCollision(pipe) {
-  // 새의 사각형 범위
+  // 새의 사각형
+  let birdWidth = 34;  // 새 이미지 폭
+  let birdHeight = 24; // 새 이미지 높이
   let birdLeft = birdX;
-  let birdRight = birdX + birdSize;
+  let birdRight = birdX + birdWidth;
   let birdTop = birdY;
-  let birdBottom = birdY + birdSize;
+  let birdBottom = birdY + birdHeight;
 
-  // 파이프 위쪽 범위
+  // 파이프 상단: 0 ~ pipe.topHeight
   let pipeTopLeft = pipe.x;
   let pipeTopRight = pipe.x + pipeWidth;
   let pipeTopBottom = pipe.topHeight;
 
-  // 파이프 아래쪽 범위
-  let pipeBottomTop = pipe.bottomY;
-
-  // 위 파이프 충돌 조건
   let collideTop =
     birdRight >= pipeTopLeft &&
     birdLeft <= pipeTopRight &&
     birdTop <= pipeTopBottom;
 
-  // 아래 파이프 충돌 조건
+  // 파이프 하단: pipe.bottomY ~ canvas 끝
+  let pipeBottomLeft = pipe.x;
+  let pipeBottomRight = pipe.x + pipeWidth;
+  let pipeBottomTop = pipe.bottomY;
+
   let collideBottom =
-    birdRight >= pipeTopLeft &&
-    birdLeft <= pipeTopRight &&
+    birdRight >= pipeBottomLeft &&
+    birdLeft <= pipeBottomRight &&
     birdBottom >= pipeBottomTop;
 
   return collideTop || collideBottom;
 }
 
 /*****************************************
- * 6) 그리기 함수
+ * 그리기 (이미지 늘이기 방식)
  *****************************************/
 function draw() {
-  // 화면 지우기
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-  // 새(노란 사각형)
-  ctx.fillStyle = "#ff0";
-  ctx.fillRect(birdX, birdY, birdSize, birdSize);
-
-  // 파이프(초록 사각형)
-  ctx.fillStyle = "green";
+  // 파이프
   pipes.forEach((p) => {
     // 위 파이프
-    ctx.fillRect(p.x, 0, pipeWidth, p.topHeight);
+    // - y=0 부터 p.topHeight만큼 늘려서 그림
+    ctx.drawImage(pipeNorthImg, p.x, 0, pipeWidth, p.topHeight);
     // 아래 파이프
-    ctx.fillRect(p.x, p.bottomY, pipeWidth, HEIGHT - p.bottomY);
+    // - y=p.bottomY 부터 화면 끝까지
+    ctx.drawImage(pipeSouthImg, p.x, p.bottomY, pipeWidth, HEIGHT - p.bottomY);
   });
 
-  // 점수 표시
+  // 새 (이미지 대신 노란 사각형 예시)
+  // 실제로는 drawImage(birdImg, birdX, birdY, birdWidth, birdHeight);
+  ctx.fillStyle = "#ff0";
+  ctx.fillRect(birdX, birdY, 34, 24);
+
+  // 점수
   ctx.fillStyle = "#000";
   ctx.font = "18px Arial";
   ctx.fillText("Score: " + score, 10, 20);
 
-  // 게임오버 시 표시
-  if (isGameOver) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+  // 게임 오버 시
+  if (gameOver) {
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.fillStyle = "#fff";
     ctx.font = "24px Arial";
-    ctx.fillText("Game Over!", WIDTH / 2 - 60, HEIGHT / 2 - 10);
+    ctx.fillText("Game Over", WIDTH / 2 - 60, HEIGHT / 2 - 10);
     ctx.fillText("Score: " + score, WIDTH / 2 - 50, HEIGHT / 2 + 30);
   }
 }
 
 /*****************************************
- * 7) 게임 루프
+ * 메인 루프
  *****************************************/
 function gameLoop() {
   update();
@@ -186,7 +183,7 @@ function gameLoop() {
 }
 
 /*****************************************
- * 8) 초기화 & 시작
+ * 초기화
  *****************************************/
 initPipes();
 gameLoop();
