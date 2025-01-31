@@ -12,9 +12,16 @@ h1 {
   color: #333;
 }
 
+#resetBtn {
+  padding: 8px 16px;
+  margin: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
 #gameCanvas {
-  background-color: #70c5ce; /* 하늘색 */
+  background-color: #70c5ce; /* 하늘색 배경 */
   border: 2px solid #333;
   display: block;
-  margin: 20px auto; /* 수평 중앙 */
+  margin: 20px auto;  /* 수평 중앙 */
 }
