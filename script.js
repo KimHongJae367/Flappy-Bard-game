@@ -17,7 +17,7 @@ const jumpPower = -8;
 
 // 파이프 관련
 let pipes = [];           // 파이프 배열
-const gap = 100;          // 파이프 사이 간격
+const gap = 150;          // 파이프 사이 간격 (!!!)
 const pipeWidth = 50;
 const pipeSpeed = 2;
 
