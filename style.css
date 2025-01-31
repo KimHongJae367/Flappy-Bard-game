@@ -20,8 +20,8 @@ h1 {
 }
 
 #gameCanvas {
-  background-color: #70c5ce; /* 하늘색 배경 */
+  background-color: #70c5ce; /* 하늘색 */
   border: 2px solid #333;
   display: block;
-  margin: 20px auto;  /* 수평 중앙 */
+  margin: 20px auto;
 }
