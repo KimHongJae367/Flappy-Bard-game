@@ -27,7 +27,7 @@ const jumpPower = -8;
 
 // 파이프 변수
 let pipes = [];
-const gap = 100;
+const gap = 125;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
