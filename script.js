@@ -10,13 +10,13 @@ const HEIGHT = canvas.height; // 480
 
 // 새(버드) 이미지 로드
 const birdImg = new Image();
-birdImg.src = "images/.png";   // 새 이미지 경로
+birdImg.src = "images/bird.png";   // 새 이미지 경로
 
 // 파이프 이미지 로드
 const pipeNorthImg = new Image();
-pipeNorthImg.src = "images/.png";  // 위쪽 파이프
+pipeNorthImg.src = "images/north.png";  // 위쪽 파이프
 const pipeSouthImg = new Image();
-pipeSouthImg.src = "images/.png";  // 아래쪽 파이프
+pipeSouthImg.src = "images/south.png";  // 아래쪽 파이프
 
 // 게임 상태 변수
 let birdX, birdY;
