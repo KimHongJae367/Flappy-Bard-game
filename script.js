@@ -20,14 +20,14 @@ pipeSouthImg.src = "images/south.png";  // 아래쪽 파이프
 
 // 게임 상태 변수
 let birdX, birdY;
-let birdSize = 34; // 새 크기 (이미지 기반)
+let birdSize = 30; // 새 크기 (이미지 기반)
 let velocity;
 const gravity = 0.5;
 const jumpPower = -8;
 
 // 파이프 변수
 let pipes = [];
-const gap = 125;
+const gap = 150;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
