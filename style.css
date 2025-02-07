@@ -17,6 +17,14 @@ h1 {
   margin: 10px;
   font-size: 1rem;
   cursor: pointer;
+  border: none;
+  background-color: #ff9800;
+  color: white;
+  border-radius: 5px;
+}
+
+#resetBtn:hover {
+  background-color: #f57c00;
 }
 
 #gameCanvas {
