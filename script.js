@@ -72,7 +72,6 @@ function createPipe(xPos) {
 /********************************
  * 4) 키보드 & 터치 이벤트
  ********************************/
-// 키보드 점프
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space" || e.code === "ArrowUp") {
     jump();
@@ -85,13 +84,16 @@ canvas.addEventListener("touchstart", (e) => {
   e.preventDefault();
 });
 
-// 점프 함수
+// 리셋 버튼
+resetBtn.addEventListener("click", () => {
+  resetGame();
+});
+
 function jump() {
   if (!isGameOver) {
     velocity = jumpPower;
   }
 }
-
 
 /********************************
  * 5) 리셋 함수
