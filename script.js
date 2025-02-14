@@ -72,23 +72,25 @@ function createPipe(xPos) {
 /********************************
  * 4) 키보드 & 터치 이벤트
  ********************************/
-// 키보드 입력 (PC)
+// 키보드 점프
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space" || e.code === "ArrowUp") {
     jump();
   }
 });
 
-// 터치 입력 (모바일/태블릿)
+// 터치(모바일) 점프
 canvas.addEventListener("touchstart", (e) => {
   jump();
-  e.preventDefault();  // 기본 터치 이벤트(스크롤 등) 방지
+  e.preventDefault();
 });
 
-// 마우스 클릭 입력 (PC)
-canvas.addEventListener("click", (e) => {
-  jump();
-});
+// 점프 함수
+function jump() {
+  if (!isGameOver) {
+    velocity = jumpPower;
+  }
+}
 
 
 /********************************
