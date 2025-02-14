@@ -72,28 +72,31 @@ function createPipe(xPos) {
 /********************************
  * 4) 키보드 & 터치 이벤트
  ********************************/
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
-    jump();
-  }
-});
-
-// 터치(모바일) 점프
-canvas.addEventListener("touchstart", (e) => {
-  jump();
-  e.preventDefault();
-});
-
-// 리셋 버튼
-resetBtn.addEventListener("click", () => {
-  resetGame();
-});
-
+// 점프 함수
 function jump() {
   if (!isGameOver) {
     velocity = jumpPower;
   }
 }
+
+// 키보드 입력 (PC)
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    jump();
+    e.preventDefault();  // 기본 동작(스크롤)을 막음
+  }
+});
+
+// 터치 입력 (모바일/태블릿)
+canvas.addEventListener("touchstart", (e) => {
+  jump();
+  e.preventDefault();
+});
+
+// 마우스 클릭 입력 (PC)
+canvas.addEventListener("click", (e) => {
+  jump();
+});
 
 /********************************
  * 5) 리셋 함수
