@@ -18,25 +18,62 @@ pipeNorthImg.src = "images/north.png";
 const pipeSouthImg = new Image();
 pipeSouthImg.src = "images/south.png";
 
-// 점프 소리 객체
-const jumpSound = new Audio('sounds/jump.mp3');
+// 점프 소리
+const jumpSound = new Audio('sound/jump.mp3');
 
-// 이미지 로드 확인 변수
+// 이미지 로딩 확인
 let imagesLoaded = 0;
+const totalImages = 3;  // 전체 이미지 개수
 
 /********************************
  * 2) 이미지 로드 완료 후 게임 시작
  ********************************/
 birdImg.onload = pipeNorthImg.onload = pipeSouthImg.onload = function() {
   imagesLoaded++;
-  if (imagesLoaded === 3) {  // 이미지 3개 모두 로드 완료 시 게임 시작
+  if (imagesLoaded === totalImages) {
+    // 이미지 전부 로드 완료!
     initGame();
     gameLoop();
   }
 };
 
 /********************************
- * 3) 파이프 생성 함수
+ * 3) 게임 상태 변수
+ ********************************/
+let birdX, birdY;
+let birdSize = 34;
+let velocity;
+const gravity = 0.5;
+const jumpPower = -8;
+
+let pipes = [];
+const gap = 100;
+const pipeWidth = 52;
+const pipeSpeed = 2;
+
+let score;
+let isGameOver;
+
+let spawnTimer;
+const spawnInterval = 90;
+
+/********************************
+ * 4) 게임 초기화 함수
+ ********************************/
+function initGame() {
+  birdX = 50;
+  birdY = HEIGHT / 2 - birdSize / 2;
+  velocity = 0;
+
+  score = 0;
+  isGameOver = false;
+
+  pipes = [];
+  spawnTimer = 0;
+}
+
+/********************************
+ * 5) 파이프 생성 함수
  ********************************/
 function createPipe(xPos) {
   const topHeight = Math.floor(Math.random() * 120) + 40;
@@ -51,26 +88,22 @@ function createPipe(xPos) {
 }
 
 /********************************
- * 4) 키보드 & 터치 이벤트
+ * 6) 이벤트 처리
  ********************************/
-// 키보드 점프 (Shift 포함)
 window.addEventListener("keydown", (e) => {
   if (["Space", "ArrowUp", "ShiftLeft", "ShiftRight"].includes(e.code)) {
     jump();
-    e.preventDefault(); // 기본 동작 방지 (Shift 등)
+    e.preventDefault();
   }
 });
 
-// 터치(모바일) 점프
 canvas.addEventListener("touchstart", (e) => {
   jump();
   e.preventDefault();
 });
 
-// 마우스 클릭 점프
 canvas.addEventListener("click", jump);
 
-// 점프 함수
 function jump() {
   if (!isGameOver) {
     velocity = jumpPower;
@@ -80,7 +113,7 @@ function jump() {
 }
 
 /********************************
- * 5) 리셋 함수
+ * 7) 리셋 함수
  ********************************/
 resetBtn.addEventListener("click", resetGame);
 
@@ -89,7 +122,7 @@ function resetGame() {
 }
 
 /********************************
- * 6) 게임 업데이트
+ * 8) 게임 업데이트
  ********************************/
 function update() {
   if (isGameOver) return;
@@ -129,7 +162,7 @@ function update() {
 }
 
 /********************************
- * 7) 충돌 판정
+ * 9) 충돌 판정
  ********************************/
 function checkCollision(pipe) {
   let birdTop = birdY;
@@ -156,7 +189,7 @@ function checkCollision(pipe) {
 }
 
 /********************************
- * 8) 게임 그리기
+ * 10) 게임 그리기
  ********************************/
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -182,16 +215,10 @@ function draw() {
 }
 
 /********************************
- * 9) 게임 루프
+ * 11) 게임 루프
  ********************************/
 function gameLoop() {
   update();
   draw();
   requestAnimationFrame(gameLoop);
 }
-
-/********************************
- * 10) 게임 시작
- ********************************/
-initGame();
-gameLoop();
