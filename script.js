@@ -72,10 +72,15 @@ function createPipe(xPos) {
 /********************************
  * 4) 키보드 & 터치 이벤트
  ********************************/
+
 // 점프 함수
 function jump() {
   if (!isGameOver) {
     velocity = jumpPower;
+
+    // 점프할 때 소리 재생
+    jumpSound.currentTime = 0;
+    jumpSound.play();
   }
 }
 
@@ -198,6 +203,9 @@ function draw() {
   // 새(이미지)
   ctx.drawImage(birdImg, birdX, birdY, birdSize, birdSize);
 
+  // 소리 객체 생성
+  const jumpSound = new Audio('sound/jump.mp3');
+  
   // 점수 표시
   ctx.fillStyle = "#000";
   ctx.font = "16px Arial";
