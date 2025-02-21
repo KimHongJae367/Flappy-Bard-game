@@ -18,44 +18,22 @@ pipeNorthImg.src = "images/North.png";
 const pipeSouthImg = new Image();
 pipeSouthImg.src = "images/South.png";
 
-// (소리 객체 생성)
-const jumpSound = new Audio('sound/jump.mp3');
+// 점프 소리 객체
+const jumpSound = new Audio('sounds/jump.mp3');
 
-// 게임 상태 변수
-let birdX, birdY;
-let birdSize = 34;
-let velocity;
-const gravity = 0.5;
-const jumpPower = -8;
-
-// 파이프 변수
-let pipes = [];
-const gap = 100;
-const pipeWidth = 52;
-const pipeSpeed = 2;
-
-// 점수 & 게임 상태
-let score;
-let isGameOver;
-
-// 파이프 타이머
-let spawnTimer;
-const spawnInterval = 90;
+// 이미지 로드 확인 변수
+let imagesLoaded = 0;
 
 /********************************
- * 2) 게임 초기화 함수
+ * 2) 이미지 로드 완료 후 게임 시작
  ********************************/
-function initGame() {
-  birdX = 50;
-  birdY = HEIGHT / 2 - birdSize / 2;
-  velocity = 0;
-
-  score = 0;
-  isGameOver = false;
-
-  pipes = [];
-  spawnTimer = 0;
-}
+birdImg.onload = pipeNorthImg.onload = pipeSouthImg.onload = function() {
+  imagesLoaded++;
+  if (imagesLoaded === 3) {  // 이미지 3개 모두 로드 완료 시 게임 시작
+    initGame();
+    gameLoop();
+  }
+};
 
 /********************************
  * 3) 파이프 생성 함수
