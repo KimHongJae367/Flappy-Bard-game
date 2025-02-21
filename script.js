@@ -14,9 +14,9 @@ birdImg.src = "images/bird.png";
 
 // 파이프 이미지
 const pipeNorthImg = new Image();
-pipeNorthImg.src = "images/North.png";
+pipeNorthImg.src = "images/north.png";
 const pipeSouthImg = new Image();
-pipeSouthImg.src = "images/South.png";
+pipeSouthImg.src = "images/south.png";
 
 // 점프 소리 객체
 const jumpSound = new Audio('sounds/jump.mp3');
