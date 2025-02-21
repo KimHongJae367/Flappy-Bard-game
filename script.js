@@ -5,29 +5,32 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const resetBtn = document.getElementById("resetBtn");
 
-const WIDTH = canvas.width;   // 320
-const HEIGHT = canvas.height; // 480
+const WIDTH = canvas.width;   
+const HEIGHT = canvas.height; 
 
-// 새(버드) 이미지 로드
+// 새 이미지
 const birdImg = new Image();
-birdImg.src = "images/bird.png";   // 새 이미지 경로
+birdImg.src = "images/bird.png";
 
-// 파이프 이미지 로드
+// 파이프 이미지
 const pipeNorthImg = new Image();
-pipeNorthImg.src = "images/north.png";  // 위쪽 파이프
+pipeNorthImg.src = "images/North.png";
 const pipeSouthImg = new Image();
-pipeSouthImg.src = "images/south.png";  // 아래쪽 파이프
+pipeSouthImg.src = "images/South.png";
+
+// (소리 객체 생성)
+const jumpSound = new Audio('sound/jump.mp3');
 
 // 게임 상태 변수
 let birdX, birdY;
-let birdSize = 30; // 새 크기 (이미지 기반)
+let birdSize = 34;
 let velocity;
 const gravity = 0.5;
 const jumpPower = -8;
 
 // 파이프 변수
 let pipes = [];
-const gap = 150;
+const gap = 100;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
@@ -37,7 +40,7 @@ let isGameOver;
 
 // 파이프 타이머
 let spawnTimer;
-const spawnInterval = 90; // 90프레임마다 새 파이프 생성
+const spawnInterval = 90;
 
 /********************************
  * 2) 게임 초기화 함수
@@ -51,7 +54,7 @@ function initGame() {
   isGameOver = false;
 
   pipes = [];
-  spawnTimer = 0;  // 파이프 타이머 초기화
+  spawnTimer = 0;
 }
 
 /********************************
@@ -72,45 +75,36 @@ function createPipe(xPos) {
 /********************************
  * 4) 키보드 & 터치 이벤트
  ********************************/
-
-/********************************
- * 3) 점프 함수
- ********************************/
-function jump() {
-  if (!isGameOver) {
-    velocity = jumpPower;
-
-    // 점프할 때 소리 재생
-    jumpSound.currentTime = 0;
-    jumpSound.play();
-  }
-}
-
-// 키보드 입력 (PC)
+// 키보드 점프 (Shift 포함)
 window.addEventListener("keydown", (e) => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
+  if (["Space", "ArrowUp", "ShiftLeft", "ShiftRight"].includes(e.code)) {
     jump();
-    e.preventDefault();  // 기본 동작(스크롤)을 막음
+    e.preventDefault(); // 기본 동작 방지 (Shift 등)
   }
 });
 
-// 터치 입력 (모바일/태블릿)
+// 터치(모바일) 점프
 canvas.addEventListener("touchstart", (e) => {
   jump();
   e.preventDefault();
 });
 
-// 마우스 클릭 입력 (PC)
-canvas.addEventListener("click", (e) => {
-  jump();
-});
+// 마우스 클릭 점프
+canvas.addEventListener("click", jump);
+
+// 점프 함수
+function jump() {
+  if (!isGameOver) {
+    velocity = jumpPower;
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+  }
+}
 
 /********************************
  * 5) 리셋 함수
  ********************************/
-resetBtn.addEventListener("click", () => {
-  resetGame();
-});
+resetBtn.addEventListener("click", resetGame);
 
 function resetGame() {
   initGame();
@@ -122,42 +116,35 @@ function resetGame() {
 function update() {
   if (isGameOver) return;
 
-  // 새 물리 적용
   velocity += gravity;
   birdY += velocity;
 
-  // 파이프 이동
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
     p.x -= pipeSpeed;
 
-    // 화면 밖으로 나간 파이프 제거
     if (p.x + pipeWidth < 0) {
       pipes.splice(i, 1);
       i--;
       continue;
     }
 
-    // 점수 증가
     if (!p.passed && p.x + pipeWidth < birdX) {
       score++;
       p.passed = true;
     }
 
-    // 충돌 판정
     if (checkCollision(p)) {
       isGameOver = true;
     }
   }
 
-  // 파이프 생성 (타이머 기반)
   spawnTimer++;
   if (spawnTimer >= spawnInterval) {
     createPipe(WIDTH + 20);
     spawnTimer = 0;
   }
 
-  // 화면 위/아래 충돌
   if (birdY < 0 || birdY + birdSize > HEIGHT) {
     isGameOver = true;
   }
@@ -196,24 +183,17 @@ function checkCollision(pipe) {
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-  // 파이프 그리기
   pipes.forEach((p) => {
     ctx.drawImage(pipeNorthImg, p.x, 0, pipeWidth, p.topHeight);
     ctx.drawImage(pipeSouthImg, p.x, p.bottomY, pipeWidth, HEIGHT - p.bottomY);
   });
 
-  // 새(이미지)
   ctx.drawImage(birdImg, birdX, birdY, birdSize, birdSize);
 
-  // 소리 객체 생성
-  const jumpSound = new Audio('sound/jump.mp3');
-  
-  // 점수 표시
   ctx.fillStyle = "#000";
   ctx.font = "16px Arial";
   ctx.fillText("Score: " + score, 10, 20);
 
-  // 게임오버 표시
   if (isGameOver) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
