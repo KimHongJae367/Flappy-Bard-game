@@ -64,7 +64,7 @@ const gravity = 0.5;
 const jumpPower = -8;
 
 let pipes = [];
-const gap = 200;
+const gap = 170;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
