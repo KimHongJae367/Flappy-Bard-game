@@ -21,24 +21,25 @@ pipeSouthImg.src = "images/south.png";
 // 점프 소리
 const jumpSound = new Audio('sound/jump.mp3');
 
+// (추가) 배경 음악
+const bgm = new Audio('sound/bgm.mp3');
+bgm.loop = true;
+bgm.volume = 0.5;  // 볼륨 50%
+
 // 이미지 로딩 확인
 let imagesLoaded = 0;
 const totalImages = 3;  // 전체 이미지 개수
 
-/********************************
- * 2) 이미지 로드 완료 후 게임 시작
- ********************************/
 birdImg.onload = pipeNorthImg.onload = pipeSouthImg.onload = function() {
   imagesLoaded++;
   if (imagesLoaded === totalImages) {
-    // 이미지 전부 로드 완료!
     initGame();
     gameLoop();
   }
 };
 
 /********************************
- * 3) 게임 상태 변수
+ * 2) 게임 상태 변수
  ********************************/
 let birdX, birdY;
 let birdSize = 34;
@@ -47,7 +48,7 @@ const gravity = 0.5;
 const jumpPower = -8;
 
 let pipes = [];
-const gap = 100;
+const gap = 200;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
@@ -58,7 +59,7 @@ let spawnTimer;
 const spawnInterval = 90;
 
 /********************************
- * 4) 게임 초기화 함수
+ * 3) 게임 초기화 함수
  ********************************/
 function initGame() {
   birdX = 50;
@@ -70,40 +71,15 @@ function initGame() {
 
   pipes = [];
   spawnTimer = 0;
+
+  // 배경 음악 재생
+  bgm.currentTime = 0;
+  bgm.play();
 }
 
 /********************************
- * 5) 파이프 생성 함수
+ * 4) 점프 함수
  ********************************/
-function createPipe(xPos) {
-  const topHeight = Math.floor(Math.random() * 120) + 40;
-  const bottomY = topHeight + gap;
-
-  pipes.push({
-    x: xPos,
-    topHeight: topHeight,
-    bottomY: bottomY,
-    passed: false
-  });
-}
-
-/********************************
- * 6) 이벤트 처리
- ********************************/
-window.addEventListener("keydown", (e) => {
-  if (["Space", "ArrowUp", "ShiftLeft", "ShiftRight"].includes(e.code)) {
-    jump();
-    e.preventDefault();
-  }
-});
-
-canvas.addEventListener("touchstart", (e) => {
-  jump();
-  e.preventDefault();
-});
-
-canvas.addEventListener("click", jump);
-
 function jump() {
   if (!isGameOver) {
     velocity = jumpPower;
@@ -113,16 +89,7 @@ function jump() {
 }
 
 /********************************
- * 7) 리셋 함수
- ********************************/
-resetBtn.addEventListener("click", resetGame);
-
-function resetGame() {
-  initGame();
-}
-
-/********************************
- * 8) 게임 업데이트
+ * 5) 게임 종료 시 BGM 정지 또는 서서히 낮추기
  ********************************/
 function update() {
   if (isGameOver) return;
@@ -146,7 +113,19 @@ function update() {
     }
 
     if (checkCollision(p)) {
-      isGameOver = true;
+      if (!isGameOver) {
+        isGameOver = true;
+
+        // 게임이 끝나면 BGM을 줄이면서 멈추기
+        let fadeOut = setInterval(() => {
+          if (bgm.volume > 0.05) {
+            bgm.volume -= 0.05;
+          } else {
+            clearInterval(fadeOut);
+            bgm.pause();
+          }
+        }, 200);
+      }
     }
   }
 
@@ -162,60 +141,16 @@ function update() {
 }
 
 /********************************
- * 9) 충돌 판정
+ * 6) 리셋 시 BGM 다시 재생
  ********************************/
-function checkCollision(pipe) {
-  let birdTop = birdY;
-  let birdBottom = birdY + birdSize;
-  let birdLeft = birdX;
-  let birdRight = birdX + birdSize;
-
-  let pipeTopLeft = pipe.x;
-  let pipeTopRight = pipe.x + pipeWidth;
-  let pipeTopBottom = pipe.topHeight;
-  let pipeBottomTop = pipe.bottomY;
-
-  let collideTop =
-    birdRight >= pipeTopLeft &&
-    birdLeft <= pipeTopRight &&
-    birdTop <= pipeTopBottom;
-
-  let collideBottom =
-    birdRight >= pipeTopLeft &&
-    birdLeft <= pipeTopRight &&
-    birdBottom >= pipeBottomTop;
-
-  return collideTop || collideBottom;
+function resetGame() {
+  initGame();
+  bgm.currentTime = 0;
+  bgm.play();
 }
 
 /********************************
- * 10) 게임 그리기
- ********************************/
-function draw() {
-  ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-  pipes.forEach((p) => {
-    ctx.drawImage(pipeNorthImg, p.x, 0, pipeWidth, p.topHeight);
-    ctx.drawImage(pipeSouthImg, p.x, p.bottomY, pipeWidth, HEIGHT - p.bottomY);
-  });
-
-  ctx.drawImage(birdImg, birdX, birdY, birdSize, birdSize);
-
-  ctx.fillStyle = "#000";
-  ctx.font = "16px Arial";
-  ctx.fillText("Score: " + score, 10, 20);
-
-  if (isGameOver) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.fillStyle = "#fff";
-    ctx.font = "24px Arial";
-    ctx.fillText("Game Over!", WIDTH / 2 - 60, HEIGHT / 2 - 10);
-  }
-}
-
-/********************************
- * 11) 게임 루프
+ * 7) 게임 루프
  ********************************/
 function gameLoop() {
   update();
