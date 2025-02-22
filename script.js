@@ -23,7 +23,7 @@ const jumpSound = new Audio('sound/jump.mp3');
 // 배경 음악 (BGM)
 const bgm = new Audio('sound/bgm.mp3');
 bgm.loop = true;
-bgm.volume = 0.5;
+bgm.volume = 1.0;
 
 // 로딩 완료 체크
 let imagesLoaded = 0;
@@ -64,7 +64,7 @@ const gravity = 0.5;
 const jumpPower = -8;
 
 let pipes = [];
-const gap = 200;
+const gap = 150;
 const pipeWidth = 52;
 const pipeSpeed = 2;
 
