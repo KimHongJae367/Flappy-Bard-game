@@ -8,23 +8,28 @@ const resetBtn = document.getElementById("resetBtn");
 const WIDTH = canvas.width;   
 const HEIGHT = canvas.height; 
 
-// 이미지 로드
+// 배경 이미지 로드
+const bgImg = new Image();
+bgImg.src = "images/background.png";
+
+// 새 및 파이프 이미지 로드
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
 
 const pipeNorthImg = new Image();
 pipeNorthImg.src = "images/north.png";
+
 const pipeSouthImg = new Image();
 pipeSouthImg.src = "images/south.png";
 
-// 점프 소리
+// 점프 소리 (소리 줄이기 적용)
 const jumpSound = new Audio('sound/jump.mp3');
-jumpSound.volume = 0.1;  // 점프 소리를 조절
+jumpSound.volume = 0.1;  // 점프 소리 볼륨 10%
 
 // 배경 음악 (BGM)
 const bgm = new Audio('sound/bgm.mp3');
 bgm.loop = true;
-bgm.volume = 1.0;
+bgm.volume = 0.5;  // 배경 음악 볼륨 50%
 
 // 로딩 완료 체크
 let imagesLoaded = 0;
@@ -215,33 +220,7 @@ function checkCollision(pipe) {
 }
 
 /********************************
- * 11) 게임 그리기
- ********************************/
-function draw() {
-  ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-  pipes.forEach((p) => {
-    ctx.drawImage(pipeNorthImg, p.x, 0, pipeWidth, p.topHeight);
-    ctx.drawImage(pipeSouthImg, p.x, p.bottomY, pipeWidth, HEIGHT - p.bottomY);
-  });
-
-  ctx.drawImage(birdImg, birdX, birdY, birdSize, birdSize);
-
-  ctx.fillStyle = "#000";
-  ctx.font = "16px Arial";
-  ctx.fillText("Score: " + score, 10, 20);
-
-  if (isGameOver) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.fillStyle = "#fff";
-    ctx.font = "24px Arial";
-    ctx.fillText("Game Over!", WIDTH / 2 - 60, HEIGHT / 2 - 10);
-  }
-}
-
-/********************************
- * 12) 게임 루프
+ * 11) 게임 루프
  ********************************/
 function gameLoop() {
   update();
