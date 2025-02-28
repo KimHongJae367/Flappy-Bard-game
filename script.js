@@ -19,7 +19,7 @@ pipeSouthImg.src = "images/south.png";
 
 // 점프 소리
 const jumpSound = new Audio('sound/jump.mp3');
-jumpSound.volume = 0.2;  // 점프 소리를 조절
+jumpSound.volume = 0.1;  // 점프 소리를 조절
 
 // 배경 음악 (BGM)
 const bgm = new Audio('sound/bgm.mp3');
